@@ -22,22 +22,30 @@ menu_dict = {
     ]
 }
 
-# --- 앱 제목 ---
+# --- 앱 UI ---
 st.title("🍽️ 오늘 뭐 먹지?")
-st.write("카테고리를 먼저 선택하고, 메뉴 추천을 받아보세요!")
+st.write("여러 음식 카테고리를 선택해서 점심 메뉴를 추천받으세요!")
 
-# --- 카테고리 선택 ---
-category = st.selectbox("🍱 카테고리를 선택하세요", list(menu_dict.keys()))
-menus = menu_dict[category]
+# --- 카테고리 복수 선택 ---
+selected_categories = st.multiselect("🍱 카테고리를 선택하세요 (복수 선택 가능)", list(menu_dict.keys()))
 
-# --- 제외할 메뉴 선택 ---
-exclude_menu = st.multiselect("❌ 제외할 메뉴를 선택하세요", menus)
-available_menus = [menu for menu in menus if menu not in exclude_menu]
+# --- 메뉴 구성 ---
+if selected_categories:
+    # 선택된 카테고리 메뉴 합치기
+    combined_menu = []
+    for cat in selected_categories:
+        combined_menu.extend(menu_dict[cat])
 
-# --- 추천 버튼 ---
-if st.button("🎲 메뉴 추천 받기"):
-    if not available_menus:
-        st.warning("추천할 수 있는 메뉴가 없습니다. 제외 항목을 줄여주세요.")
-    else:
-        picked = random.choice(available_menus)
-        st.success(f"{category} 중 오늘의 추천 메뉴는 **{picked}** 입니다! 😋")
+    # --- 제외할 메뉴 선택 ---
+    exclude_menu = st.multiselect("❌ 제외할 메뉴를 선택하세요", combined_menu)
+    available_menus = [menu for menu in combined_menu if menu not in exclude_menu]
+
+    # --- 추천 버튼 ---
+    if st.button("🎲 메뉴 추천 받기"):
+        if not available_menus:
+            st.warning("추천할 수 있는 메뉴가 없습니다. 제외 항목을 줄여주세요.")
+        else:
+            picked = random.choice(available_menus)
+            st.success(f"오늘의 추천 메뉴는 **{picked}** 입니다! 😋")
+else:
+    st.info("한 개 이상의 카테고리를 선택해주세요.")
